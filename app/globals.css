@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-parchment text-charcoal font-sans antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-display font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Skip link for keyboard/screen-reader users */
+  .skip-link {
+    @apply absolute left-3 -top-12 focus:top-3 bg-ink text-cream px-[18px] py-3 z-[999] rounded-sm
+           font-sans text-sm font-semibold transition-[top] duration-150;
+  }
+
+  .wrap {
+    @apply max-w-wrap mx-auto px-5 sm:px-8;
+  }
+
+  .mono {
+    @apply font-mono uppercase tracking-[0.06em];
+  }
+
+  /* Signature circular seal motif used for the logo mark and numbered pillars */
+  .seal {
+    @apply relative flex items-center justify-center flex-shrink-0 rounded-full border-[1.5px] border-current;
+  }
+  .seal::before {
+    content: "";
+    @apply absolute inset-[6px] border border-current rounded-full opacity-55;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-6 py-3 font-sans font-semibold text-sm transition-all duration-200;
+  }
+  .btn-brass {
+    @apply bg-brass text-ink hover:bg-brass-dim;
+  }
+  .btn-outline {
+    @apply border border-ink/30 text-ink hover:border-ink;
+  }
+  .btn-ink {
+    @apply bg-ink text-cream hover:bg-ink-2;
+  }
+
+  /* Scroll-reveal utility: JS toggles the `.is-visible` class via IntersectionObserver */
+  .reveal {
+    @apply opacity-0 translate-y-4 transition-all duration-700 ease-out;
+  }
+  .reveal.is-visible {
+    @apply opacity-100 translate-y-0;
+  }
+}

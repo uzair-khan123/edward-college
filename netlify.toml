@@ -1,0 +1,12 @@
+# Netlify configuration for Edward Model College Next.js application
+# Next.js 14 App Router deployment configuration with @netlify/plugin-nextjs
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
