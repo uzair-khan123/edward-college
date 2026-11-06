@@ -1,26 +1,7 @@
-import type { Metadata } from "next";
-import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
+import type { Metadata } from "next"
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AdminNav from "@/components/AdminNav";
 import ScrollReveal from "@/components/ScrollReveal";
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "900"],
-  variable: "--font-fraunces",
-});
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
-});
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-plex-mono",
-});
-
 // TODO: replace with the real live domain once deployed
 const siteUrl = "https://www.edwardmodelcollege.edu.pk";
 
@@ -60,20 +41,19 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
 };
-
+import Footer from "@/components/Footer";
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}>
-      <body>
+  return
+   <html lang="en">
+    <AdminNav />      <body>
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <Navbar />
-        <main id="main-content">{children}</main>
+<AdminNav />        <main id="main-content">{children}</main>
         <Footer />
         {/* Client-only helper that wires up IntersectionObserver for .reveal elements */}
         <ScrollReveal />
       </body>
     </html>
-  );
+  ;
 }
