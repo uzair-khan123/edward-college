@@ -1,15 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 /**
- * Renders nothing - just attaches an IntersectionObserver on mount that
- * adds `.is-visible` to any `.reveal` element as it scrolls into view.
- * Ported from the original site's js/main.js scroll-reveal behaviour.
+ * Handles scroll reveal animations across page transitions.
+ * Includes a safety timeout fallback so content is NEVER trapped invisible.
  */
 export default function ScrollReveal() {
+  const pathname = usePathname();
+
   useEffect(() => {
     const elements = document.querySelectorAll(".reveal");
+
+    if (!("IntersectionObserver" in window)) {
+      elements.forEach((el) => el.classList.add("is-visible"));
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -19,11 +27,21 @@ export default function ScrollReveal() {
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.1 }
     );
+
     elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+
+    // Safety fallback: reveal all elements after 400ms so content is never hidden if observer stalls
+    const fallbackTimer = setTimeout(() => {
+      elements.forEach((el) => el.classList.add("is-visible"));
+    }, 400);
+
+    return () => {
+      clearTimeout(fallbackTimer);
+      observer.disconnect();
+    };
+  }, [pathname]);
 
   return null;
 }
