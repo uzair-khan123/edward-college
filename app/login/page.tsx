@@ -46,7 +46,10 @@ function LoginForm() {
       setFormError("Incorrect email or password. Please try again.");
       return;
     }
-    router.push(searchParams.get("redirectTo") ?? "/admin");
+    const rawRedirect = searchParams.get("redirectTo");
+    const safeDestination = getSafeAdminRedirect(rawRedirect, "/admin");
+
+    router.push(safeDestination);
     router.refresh();
   }
 
@@ -102,4 +105,81 @@ function LoginForm() {
       </p>
     </div>
   );
+}
+
+/**
+ * Strictly validates same-origin redirect destinations for admin login.
+ * Only allows exact `/admin` or `/admin/...` subpaths.
+ * Rejects external origins, protocol-relative paths, backslashes, and control characters.
+ * Preserves valid query parameters and hash fragments.
+ */
+function getSafeAdminRedirect(
+  target: string | null | undefined,
+  fallback = "/admin"
+): string {
+  if (!target || typeof target !== "string") {
+    return fallback;
+  }
+
+  const trimmed = target.trim();
+
+  // 1. Reject empty strings, any backslashes, or control characters (ASCII 0-31 & 127)
+  if (
+    !trimmed ||
+    trimmed.includes("\\") ||
+    /[\x00-\x1F\x7F]/.test(trimmed)
+  ) {
+    return fallback;
+  }
+
+  // 2. Must start with '/' but NOT '//' (blocks protocol-relative URLs immediately)
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) {
+    return fallback;
+  }
+
+  // 3. Client-side URL parser using dynamic browser window.location.origin
+  // (No hardcoded domain, adapts to localhost, Netlify preview, or production)
+  try {
+    const baseOrigin =
+      typeof window !== "undefined" && window.location.origin
+        ? window.location.origin
+        : "http://localhost:3000";
+
+    const parsed = new URL(trimmed, baseOrigin);
+
+    // 4. Strict exact same-origin assertion
+    if (parsed.origin !== baseOrigin) {
+      return fallback;
+    }
+
+    // 5. Must strictly remain http: or https:
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return fallback;
+    }
+
+    // 6. Pathname must not have double slashes after URL parsing
+    if (parsed.pathname.startsWith("//")) {
+      return fallback;
+    }
+
+    // 7. STRICT SCOPE GUARD: Only exact "/admin" or subpaths like "/admin/..."
+    // Specifically prevents prefix bypasses like "/administrator" or "/admin-settings"
+    const pathname = parsed.pathname;
+
+    if (/%(?:2e|2f|5c|25)/i.test(pathname)) {
+      return fallback;
+    }
+
+    const isStrictAdminPath =
+      pathname === "/admin" || pathname.startsWith("/admin/");
+
+    if (!isStrictAdminPath) {
+      return fallback;
+    }
+
+    // 8. Return safe relative pathname with its query parameters and hash intact
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return fallback;
+  }
 }
