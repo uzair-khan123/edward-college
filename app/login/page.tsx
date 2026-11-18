@@ -43,7 +43,8 @@ function LoginForm() {
 
     setLoading(false);
     if (error) {
-      setFormError("Incorrect email or password. Please try again.");
+      console.error("Login error:", error);
+      setFormError(error.message || "Incorrect email or password. Please try again.");
       return;
     }
     const rawRedirect = searchParams.get("redirectTo");
